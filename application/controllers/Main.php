@@ -55,6 +55,18 @@ class main extends CI_Controller
 		}
 	}
 
+	public function index()
+	{
+		$data['title'] = 'Beranda';
+
+
+		$this->load->view('Layout/Header', $data);
+		$this->load->view('Layout/Sidebar');
+		$this->load->view('Layout/Navbar');
+		$this->load->view('Dashboard/index');
+		$this->load->view('Layout/Footer');
+	}
+
 
 
 	public function logout()
