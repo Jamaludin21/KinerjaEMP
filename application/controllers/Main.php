@@ -11,6 +11,16 @@ class main extends CI_Controller
 		$this->load->library('pagination');
 	}
 
+	public function index() {
+		$data['title'] = "Main Dashboard";
+
+		$this->load->view('Layout/Header', $data);
+		$this->load->view('Layout/Sidebar');
+		$this->load->view('Layout/Navbar');
+		$this->load->view('Content/index');
+		$this->load->view('Layout/Footer');
+	}
+
 
 	public function login()
 	{
