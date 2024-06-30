@@ -54,6 +54,10 @@ $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
 $route[''] = 'main/index';
+$route['users'] = 'main/users';
+$route['rekap'] = 'main/rekap';
+$route['penilaian'] = 'main/penilaian';
+$route['pencapaian'] = 'main/pencapaian';
 
 $route['login'] = 'main/login';
 $route['logout'] = 'main/logout';
