@@ -55,9 +55,9 @@ $route['translate_uri_dashes'] = FALSE;
 
 $route[''] = 'main/index';
 $route['users'] = 'main/users';
-$route['rekap'] = 'main/rekap';
-$route['penilaian'] = 'main/penilaian';
-$route['pencapaian'] = 'main/pencapaian';
+$route['rekap'] = 'main/recap';
+$route['penilaian'] = 'main/evaluated';
+$route['pencapaian'] = 'main/achievement';
 
 $route['login'] = 'main/login';
 $route['logout'] = 'main/logout';

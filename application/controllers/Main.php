@@ -58,22 +58,28 @@ class main extends CI_Controller
 			}
 		}
 	}
-	public function logout()
-	{
-		$this->session->sess_destroy();
-		redirect('login');
-	}
 
 
 
 	public function index() {
 		$data['title'] = "Main Dashboard";
 
+		if (!$this->session->userdata('user_id')) {
+			redirect('login');
+		} else {
+			$users = $this->db->get_where('users', ['id' => $this->session->userdata('user_id')])->row_array();
+		}
+
+		$data = array(
+			'title' => 'Main Dashboard',
+			'session' => $users,
+		);
+
 		$this->load->view('Layout/Header', $data);
-		$this->load->view('Layout/Sidebar');
-		$this->load->view('Layout/Navbar');
-		$this->load->view('Content/index');
-		$this->load->view('Layout/Footer');
+		$this->load->view('Layout/Sidebar', $data);
+		$this->load->view('Layout/Navbar', $data);
+		$this->load->view('Content/index', $data);
+		$this->load->view('Layout/Footer', $data);
 	}
 
 
@@ -85,6 +91,42 @@ class main extends CI_Controller
 		$this->load->view('Layout/Navbar');
 		$this->load->view('Content/users');
 		$this->load->view('Layout/Footer');
+	}
+
+	public function recap() {
+		$data['title'] = "Data Rekap";
+
+		$this->load->view('Layout/Header', $data);
+		$this->load->view('Layout/Sidebar');
+		$this->load->view('Layout/Navbar');
+		$this->load->view('Content/recap');
+		$this->load->view('Layout/Footer');
+	}
+
+	public function evaluated() {
+		$data['title'] = "Data Penilaian";
+
+		$this->load->view('Layout/Header', $data);
+		$this->load->view('Layout/Sidebar');
+		$this->load->view('Layout/Navbar');
+		$this->load->view('Content/evaluated');
+		$this->load->view('Layout/Footer');
+	}
+
+	public function achievement() {
+		$data['title'] = "Data Pencapaian";
+
+		$this->load->view('Layout/Header', $data);
+		$this->load->view('Layout/Sidebar');
+		$this->load->view('Layout/Navbar');
+		$this->load->view('Content/achievement');
+		$this->load->view('Layout/Footer');
+	}
+
+	public function logout()
+	{
+		$this->session->sess_destroy();
+		redirect('login');
 	}
 
 }
