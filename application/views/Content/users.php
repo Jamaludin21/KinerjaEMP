@@ -1,118 +1,51 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
-	<!-- Content -->
 	<div class="container-xxl flex-grow-1 container-p-y">
 		<div class="card">
-			<h5 class="card-header">Data Pengguna</h5>
+			<div class="d-flex justify-content-between align-items-center p-3">
+				<h5 class="card-header mb-0">Data Pengguna</h5>
+				<button class="btn btn-primary btn-sm">
+					<i class="bx bx-plus"></i> Add
+				</button>
+			</div>
 			<div class="table-responsive text-nowrap">
 				<table class="table">
 					<thead>
 						<tr class="text-center">
-							<th>Nama</th>
+							<th>Username</th>
 							<th>Email</th>
-							<th>Jabatan</th>
-							<th>Status</th>
-							<th>Tindakan</th>
+							<th>Role</th>
+							<th>Created At</th>
+							<th>Actions</th>
 						</tr>
 					</thead>
 					<tbody class="table-border-bottom-0 text-center">
-						<tr>
-							<td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>Angular
-									Project</strong></td>
-							<td>Albert Cook</td>
-							<td>
-								Lurah
-							</td>
-							<td><span class="badge bg-label-primary me-1">Active</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
+						<?php foreach ($users as $user): ?>
+							<tr>
+								<td><?= htmlspecialchars($user['username']) ?></td>
+								<td><?= htmlspecialchars($user['email']) ?></td>
+								<td>
+									<span class="badge bg-label-<?= htmlspecialchars($user['role']['color']) ?>">
+										<?= htmlspecialchars($user['role']['label']) ?>
+									</span>
+								</td>
+								<td><?= date('d M Y, H:i', strtotime($user['created_at'])) ?></td>
+								<td>
+									<button class="btn btn-success btn-sm">
+										<i class="bx bx-edit-alt me-1"></i> Edit
 									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-1"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-1"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td><i class="fab fa-react fa-lg text-info me-3"></i> <strong>React Project</strong></td>
-							<td>Barry Hunter</td>
-							<td>
-								Lurah
-							</td>
-							<td><span class="badge bg-label-success me-1">Completed</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
+									<button class="btn btn-danger btn-sm" <?= $user['isDisabled'] ? 'disabled' : '' ?>>
+										<i class="bx bx-trash me-1"></i> Delete
 									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-2"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-2"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td><i class="fab fa-vuejs fa-lg text-success me-3"></i> <strong>VueJs Project</strong>
-							</td>
-							<td>Trevor Baker</td>
-							<td>
-								Lurah
-							</td>
-							<td><span class="badge bg-label-info me-1">Scheduled</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
-									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-2"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-2"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<i class="fab fa-bootstrap fa-lg text-primary me-3"></i> <strong>Bootstrap
-									Project</strong>
-							</td>
-							<td>Jerry Milton</td>
-							<td>
-								Lurah
-							</td>
-							<td><span class="badge bg-label-warning me-1">Pending</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
-									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-2"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-2"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
+								</td>
+							</tr>
+						<?php endforeach; ?>
 					</tbody>
 				</table>
+				<?php if (empty($users)): ?>
+					<p class="text-center mt-3">No users found.</p>
+				<?php endif; ?>
 			</div>
 		</div>
 	</div>
 </div>
-<!-- / Content -->

@@ -53,11 +53,12 @@ $route['default_controller'] = 'Main';
 $route['404_override'] = '';
 $route['translate_uri_dashes'] = FALSE;
 
+$route['login'] = 'main/login';
 $route[''] = 'main/index';
 $route['users'] = 'main/users';
 $route['rekap'] = 'main/recap';
 $route['penilaian'] = 'main/evaluated';
 $route['pencapaian'] = 'main/achievement';
 
-$route['login'] = 'main/login';
-$route['logout'] = 'main/logout';
+$route['postLogin'] = "auth/postLogin";
+$route['logout'] = 'auth/logout';

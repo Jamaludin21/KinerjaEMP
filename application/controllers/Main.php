@@ -6,127 +6,105 @@ class main extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
-		$this->load->library('form_validation');
-		$this->load->library('session');
-		$this->load->library('pagination');
+		$this->load->library(['form_validation', 'session', 'pagination']);
+		$this->load->model('User_model');
+		$this->sessionUserId = $this->session->userdata('user_id');
+		$this->sessionUserRole = $this->session->userdata('role');
+		$this->roleLabels = [
+			1 => ['label' => 'Lurah', 'color' => 'danger'],
+			2 => ['label' => 'Kepala Sekretariat', 'color' => 'primary'],
+			3 => ['label' => 'Kepala Kesejahteraan Sosial', 'color' => 'primary'],
+			4 => ['label' => 'Kepala Pemerintahan dan Trantibum', 'color' => 'primary'],
+			5 => ['label' => 'Kepala Pemberdayaan Masyarakat dan Pembangunan', 'color' => 'primary'],
+		];
 	}
 
-	public function login()
+	// Render function to handle layout structure dynamically
+	private function render($view, $data = [], $is_login = false)
 	{
-		$data['title'] = 'Login';
-
-
+		$data['session'] = $this->session->userdata();
 		$this->load->view('Layout/Header', $data);
-		$this->load->view('Auth/Login');
-		$this->load->view('Layout/Footer');
-	}
 
-	public function postLogin()
-	{
-		$this->form_validation->set_rules('username_or_email', 'Username or Email', 'required');
-		$this->form_validation->set_rules('password', 'Password', 'required');
-
-		if ($this->form_validation->run() == FALSE) {
-			$this->session->set_flashdata('error', 'Login failed. Please try again.');
-			redirect('login');
-		} else {
-			$username_or_email = $this->input->post('username_or_email');
-			$password = $this->input->post('password');
-
-			if (filter_var($username_or_email, FILTER_VALIDATE_EMAIL)) {
-				$this->db->where('email', $username_or_email);
-			} else {
-				$this->db->where('username', $username_or_email);
-			}
-
-			$query = $this->db->get('users');
-			$user = $query->row_array();
-
-			if ($user && password_verify($password, $user['password'])) {
-				$user_data = array(
-					'user_id' => $user['id'],
-					'username' => $user['username'],
-					'email' => $user['email'],
-					'role' => $user['role'],
-					'logged_in' => TRUE
-				);
-				$this->session->set_userdata($user_data);
-				redirect('');
-			} else {
-				$this->session->set_flashdata('error', 'Invalid username/email or password');
-				redirect('login');
-			}
-		}
-	}
-
-
-
-	public function index() {
-		$data['title'] = "Main Dashboard";
-
-		if (!$this->session->userdata('user_id')) {
-			redirect('login');
-		} else {
-			$users = $this->db->get_where('users', ['id' => $this->session->userdata('user_id')])->row_array();
+		if (!$is_login) {
+			$this->load->view('Layout/Sidebar', $data);
+			$this->load->view('Layout/Navbar', $data);
 		}
 
-		$data = array(
-			'title' => 'Main Dashboard',
-			'session' => $users,
-		);
-
-		$this->load->view('Layout/Header', $data);
-		$this->load->view('Layout/Sidebar', $data);
-		$this->load->view('Layout/Navbar', $data);
-		$this->load->view('Content/index', $data);
+		$this->load->view($view, $data);
 		$this->load->view('Layout/Footer', $data);
 	}
 
-
-	public function users() {
-		$data['title'] = "Data Pengguna";
-
-		$this->load->view('Layout/Header', $data);
-		$this->load->view('Layout/Sidebar');
-		$this->load->view('Layout/Navbar');
-		$this->load->view('Content/users');
-		$this->load->view('Layout/Footer');
-	}
-
-	public function recap() {
-		$data['title'] = "Data Rekap";
-
-		$this->load->view('Layout/Header', $data);
-		$this->load->view('Layout/Sidebar');
-		$this->load->view('Layout/Navbar');
-		$this->load->view('Content/recap');
-		$this->load->view('Layout/Footer');
-	}
-
-	public function evaluated() {
-		$data['title'] = "Data Penilaian";
-
-		$this->load->view('Layout/Header', $data);
-		$this->load->view('Layout/Sidebar');
-		$this->load->view('Layout/Navbar');
-		$this->load->view('Content/evaluated');
-		$this->load->view('Layout/Footer');
-	}
-
-	public function achievement() {
-		$data['title'] = "Data Pencapaian";
-
-		$this->load->view('Layout/Header', $data);
-		$this->load->view('Layout/Sidebar');
-		$this->load->view('Layout/Navbar');
-		$this->load->view('Content/achievement');
-		$this->load->view('Layout/Footer');
-	}
-
-	public function logout()
+	// Ensure User is Logged In
+	private function require_login()
 	{
-		$this->session->sess_destroy();
-		redirect('login');
+		if (!$this->session->userdata('user_id')) {
+			redirect('login');
+		}
+	}
+
+	// Display Login Page (Only Header, Content, and Footer)
+	public function login()
+	{
+		$this->render('Auth/Login', ['title' => 'Login'], true);
+	}
+
+	// Dashboard
+	public function index()
+	{
+		$this->require_login();
+		$this->render('Content/index', ['title' => 'Main Dashboard']);
+	}
+
+
+	// Users Page
+	public function users()
+	{
+		$this->require_login();
+		$userdata = $this->User_model->get_all_users();
+
+		// Process user roles and disable conditions
+		$usersData = [];
+		foreach ($userdata as $user) {
+			$role = $this->roleLabels[$user['role']] ?? ['label' => 'Unknown', 'color' => 'secondary'];
+			$isDisabled = $user['id'] == $this->sessionUserId && $user['role'] == $this->sessionUserRole;
+
+			$usersData[] = [
+				'id' => $user['id'],
+				'username' => $user['username'],
+				'email' => $user['email'],
+				'role' => $role,
+				'created_at' => $user['created_at'],
+				'isDisabled' => $isDisabled
+			];
+		}
+
+		// Pass processed data to the view
+		$this->render('Content/users', [
+			'title' => 'Data Pengguna',
+			'users' => $usersData
+		]);
+	}
+
+
+	// Recap Page
+	public function recap()
+	{
+		$this->require_login();
+		$this->render('Content/recap', ['title' => 'Data Rekap']);
+	}
+
+	// Evaluated Page
+	public function evaluated()
+	{
+		$this->require_login();
+		$this->render('Content/evaluated', ['title' => 'Data Penilaian']);
+	}
+
+	// Achievement Page
+	public function achievement()
+	{
+		$this->require_login();
+		$this->render('Content/achievement', ['title' => 'Data Pencapaian']);
 	}
 
 }
