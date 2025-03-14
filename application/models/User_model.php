@@ -19,4 +19,18 @@ class User_model extends CI_Model
 		$query = $this->db->get();
 		return $query->result_array();
 	}
+
+	public function get_role()
+	{
+		$this->db->select('*');
+		$this->db->from('role');
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
+	// Insert user
+	public function insert_user($data)
+	{
+		return $this->db->insert('users', $data);
+	}
 }

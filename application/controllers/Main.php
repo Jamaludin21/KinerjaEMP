@@ -61,6 +61,7 @@ class main extends CI_Controller
 	{
 		$this->require_login();
 		$userdata = $this->User_model->get_all_users();
+		$roles = $this->User_model->get_role();
 
 		// Process user roles and disable conditions
 		$usersData = [];
@@ -81,7 +82,8 @@ class main extends CI_Controller
 		// Pass processed data to the view
 		$this->render('Content/users', [
 			'title' => 'Data Pengguna',
-			'users' => $usersData
+			'users' => $usersData,
+			'roles' => $roles
 		]);
 	}
 
