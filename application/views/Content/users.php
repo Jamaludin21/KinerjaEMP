@@ -31,11 +31,18 @@
 								</td>
 								<td><?= date('d M Y, H:i', strtotime($user['created_at'])) ?></td>
 								<td>
-									<button class="btn btn-success btn-sm">
-										<i class="bx bx-edit-alt me-1"></i> Edit
+									<button class="btn btn-warning btn-sm open-edit-modal" data-bs-toggle="modal"
+										data-bs-target="#editUserModal" data-url="<?= base_url('saveUser') ?>"
+										data-id="<?= $user['id'] ?>"
+										data-username="<?= htmlspecialchars($user['username']) ?>"
+										data-email="<?= htmlspecialchars($user['email']) ?>"
+										data-role="<?= htmlspecialchars($user['role']['id']) ?>">
+										<i class="bx bx-edit me-1"></i> Edit
 									</button>
-									<button class="btn btn-danger btn-sm deleteBtnUser" <?= $user['isDisabled'] ? 'disabled' : '' ?> data-bs-toggle="modal" data-bs-target="#deleteBtnUser"
-										data-id="<?= $user['id'] ?>"> <i class=" bx bx-trash me-1"></i> Delete
+
+									<button class="btn btn-danger btn-sm open-delete-modal" <?= $user['isDisabled'] ? 'disabled' : '' ?> data-bs-toggle="modal" data-bs-target="#deleteModal"
+										data-id="<?= $user['id'] ?>" data-url="<?= site_url("deleteUser/{$user['id']}") ?>">
+										<i class="bx bx-trash me-1"></i> Delete
 									</button>
 								</td>
 							</tr>

@@ -63,5 +63,5 @@ $route['pencapaian'] = 'main/achievement';
 $route['postLogin'] = "auth/postLogin";
 $route['logout'] = 'auth/logout';
 
-$route['addUser'] = 'action/add_user';
+$route['saveUser'] = 'action/save_user';
 $route['deleteUser/(:num)'] = 'action/delete_user/$1';

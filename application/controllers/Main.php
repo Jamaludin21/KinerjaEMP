@@ -11,11 +11,11 @@ class main extends CI_Controller
 		$this->sessionUserId = $this->session->userdata('user_id');
 		$this->sessionUserRole = $this->session->userdata('role');
 		$this->roleLabels = [
-			1 => ['label' => 'Lurah', 'color' => 'danger'],
-			2 => ['label' => 'Kepala Sekretariat', 'color' => 'primary'],
-			3 => ['label' => 'Kepala Kesejahteraan Sosial', 'color' => 'primary'],
-			4 => ['label' => 'Kepala Pemerintahan dan Trantibum', 'color' => 'primary'],
-			5 => ['label' => 'Kepala Pemberdayaan Masyarakat dan Pembangunan', 'color' => 'primary'],
+			1 => ['id' => 1, 'label' => 'Lurah', 'color' => 'danger'],
+			2 => ['id' => 2, 'label' => 'Kepala Sekretariat', 'color' => 'primary'],
+			3 => ['id' => 3, 'label' => 'Kepala Kesejahteraan Sosial', 'color' => 'primary'],
+			4 => ['id' => 4, 'label' => 'Kepala Pemerintahan dan Trantibum', 'color' => 'primary'],
+			5 => ['id' => 5, 'label' => 'Kepala Pemberdayaan Masyarakat dan Pembangunan', 'color' => 'primary'],
 		];
 	}
 
