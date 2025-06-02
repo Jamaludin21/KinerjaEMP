@@ -1,5 +1,10 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
+	<?php if ($this->session->flashdata('error')): ?>
+		<div class="alert alert-danger" role="alert">
+			<?= $this->session->flashdata('error') ?>
+		</div>
+	<?php endif; ?>
 	<!-- Content -->
 	<div class="container-xxl flex-grow-1 container-p-y">
 		<div class="row">
@@ -7,7 +12,7 @@
 				<div class="card">
 					<div class="card-body">
 						<span class="fw-semibold d-block mb-1">Pengguna</span>
-						<h3 class="card-title mb-2">$12,628</h3>
+						<h3 class="card-title mb-2"><?= $penggunaCount ?></h3>
 					</div>
 				</div>
 			</div>
@@ -15,7 +20,7 @@
 				<div class="card">
 					<div class="card-body">
 						<span class="fw-semibold d-block mb-1">Data Absensi</span>
-						<h3 class="card-title mb-2">$12,628</h3>
+						<h3 class="card-title mb-2"><?= $absensiCount ?></h3>
 					</div>
 				</div>
 			</div>

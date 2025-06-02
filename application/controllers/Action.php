@@ -30,15 +30,34 @@ class action extends CI_Controller
 			'role' => $this->input->post('role', true),
 		];
 
-		// If password is provided, hash it (useful for updates)
+		// Hash password if provided
 		if (!empty($password)) {
 			$data['password'] = password_hash($password, PASSWORD_BCRYPT);
 		}
 
+		// Get current session user info
+		$currentUserId = $this->session->userdata('user_id');
+		$currentUserRole = $this->session->userdata('role');
+
+		$newRole = (int) $this->input->post('role', true);
+
+		// Prevent Lurah from creating Pegawai
+		if ($currentUserRole == 1 && $newRole == 6) {
+			echo json_encode(['status' => 'error', 'message' => 'Lurah cannot create Pegawai']);
+			return;
+		}
+
+		// Prevent Kepala Divisi from creating any role other than Pegawai
+		if (in_array($currentUserRole, [2, 3, 4, 5]) && $newRole != 6) {
+			echo json_encode(['status' => 'error', 'message' => 'You can only create Pegawai']);
+			return;
+		}
+
+
 		if ($id) {
-			// Update existing user
+			// Update
 			$this->db->where('id', $id);
-			$update = $this->db->update('users', $data);
+			$update = $this->User_model->update_user($data);
 
 			if ($update) {
 				echo json_encode(['status' => 'success', 'message' => 'User updated successfully']);
@@ -46,19 +65,30 @@ class action extends CI_Controller
 				echo json_encode(['status' => 'error', 'message' => 'Failed to update user']);
 			}
 		} else {
-			// Create new user with a default password if not provided
+			// Create
 			$data['password'] = password_hash("123456", PASSWORD_BCRYPT);
 			$data['created_at'] = date('Y-m-d H:i:s');
 
-			$insert = $this->db->insert('users', $data);
+			$insert = $this->User_model->insert_user($data);
 
 			if ($insert) {
+				$newUserId = $this->db->insert_id();
+
+				// If current user is Head Division (2, 3, or 4), insert into employees table
+				if (in_array($currentUserRole, [2, 3, 4, 5])) {
+					$this->db->insert('employees', [
+						'user_id' => $newUserId,
+						'supervisor_id' => $currentUserId,
+					]);
+				}
+
 				echo json_encode(['status' => 'success', 'message' => 'User added successfully']);
 			} else {
 				echo json_encode(['status' => 'error', 'message' => 'Failed to add user']);
 			}
 		}
 	}
+
 
 
 	public function delete_user($id)

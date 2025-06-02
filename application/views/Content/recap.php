@@ -3,166 +3,112 @@
 	<!-- Content -->
 	<div class="container-xxl flex-grow-1 container-p-y">
 		<div class="card">
-			<h5 class="card-header">Table Basic</h5>
+			<div class="card-header">
+				<h4>Rekap Presensi</h4>
+				<p>Tanggal-Bulan-Tahun : <?= $data['tanggal'] ?></p>
+			</div>
 			<div class="table-responsive text-nowrap">
-				<table class="table">
+				<table class="table table-bordered">
 					<thead>
 						<tr>
-							<th>Project</th>
-							<th>Client</th>
-							<th>Users</th>
-							<th>Status</th>
-							<th>Actions</th>
+							<?php if ((int) $this->session->userdata('role_id') !== 6): ?>
+								<th>Nama</th>
+								<th>Email</th>
+							<?php endif; ?>
+							<th>Tanggal</th>
+							<th>Clock In</th>
+							<th>Clock Out</th>
+							<th>Status In</th>
+							<th>Status Out</th>
+							<th>Aksi</th>
 						</tr>
 					</thead>
-					<tbody class="table-border-bottom-0">
-						<tr>
-							<td><i class="fab fa-angular fa-lg text-danger me-3"></i> <strong>Angular
-									Project</strong></td>
-							<td>Albert Cook</td>
-							<td>
-								<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Lilian Fuller">
-										<img src="../assets/img/avatars/5.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Sophia Wilkerson">
-										<img src="../assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Christina Parker">
-										<img src="../assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-									</li>
-								</ul>
-							</td>
-							<td><span class="badge bg-label-primary me-1">Active</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
+					<tbody>
+						<?php foreach ($data['presensi'] as $p): ?>
+							<tr>
+								<?php if ((int) $this->session->userdata('role_id') !== 6): ?>
+									<td><?= $p->employee_name ?? '-' ?></td>
+									<td><?= $p->employee_email ?? '-' ?></td>
+								<?php endif; ?>
+								<td><?= date('d-m-Y', strtotime($p->created_at)) ?></td>
+								<td><?= $p->clock_in ?? '-' ?></td>
+								<td><?= $p->clock_out ?? '-' ?></td>
+								<td><?= $p->status_in ?? '-' ?></td>
+								<td><?= $p->status_out ?? '-' ?></td>
+								<td>
+									<?php
+									$employee_id = $p->employee_id;
+									$modal_id = 'modalPresensi_' . $employee_id;
+									?>
+									<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+										data-bs-target="#<?= $modal_id ?>" data-user-id="<?= $p->employee_id ?>"
+										data-employee-id="<?= $p->employee_id ?>">
+										Rekap Bulanan
 									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-1"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-1"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td><i class="fab fa-react fa-lg text-info me-3"></i> <strong>React Project</strong></td>
-							<td>Barry Hunter</td>
-							<td>
-								<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Lilian Fuller">
-										<img src="../assets/img/avatars/5.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Sophia Wilkerson">
-										<img src="../assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Christina Parker">
-										<img src="../assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-									</li>
-								</ul>
-							</td>
-							<td><span class="badge bg-label-success me-1">Completed</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
-									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-2"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-2"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td><i class="fab fa-vuejs fa-lg text-success me-3"></i> <strong>VueJs Project</strong>
-							</td>
-							<td>Trevor Baker</td>
-							<td>
-								<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Lilian Fuller">
-										<img src="../assets/img/avatars/5.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Sophia Wilkerson">
-										<img src="../assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Christina Parker">
-										<img src="../assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-									</li>
-								</ul>
-							</td>
-							<td><span class="badge bg-label-info me-1">Scheduled</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
-									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-2"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-2"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<i class="fab fa-bootstrap fa-lg text-primary me-3"></i> <strong>Bootstrap
-									Project</strong>
-							</td>
-							<td>Jerry Milton</td>
-							<td>
-								<ul class="list-unstyled users-list m-0 avatar-group d-flex align-items-center">
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Lilian Fuller">
-										<img src="../assets/img/avatars/5.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Sophia Wilkerson">
-										<img src="../assets/img/avatars/6.png" alt="Avatar" class="rounded-circle" />
-									</li>
-									<li data-bs-toggle="tooltip" data-popup="tooltip-custom" data-bs-placement="top"
-										class="avatar avatar-xs pull-up" title="Christina Parker">
-										<img src="../assets/img/avatars/7.png" alt="Avatar" class="rounded-circle" />
-									</li>
-								</ul>
-							</td>
-							<td><span class="badge bg-label-warning me-1">Pending</span></td>
-							<td>
-								<div class="dropdown">
-									<button type="button" class="btn p-0 dropdown-toggle hide-arrow"
-										data-bs-toggle="dropdown">
-										<i class="bx bx-dots-vertical-rounded"></i>
-									</button>
-									<div class="dropdown-menu">
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-edit-alt me-2"></i> Edit</a>
-										<a class="dropdown-item" href="javascript:void(0);"><i
-												class="bx bx-trash me-2"></i> Delete</a>
-									</div>
-								</div>
-							</td>
-						</tr>
+								</td>
+							</tr>
+						<?php endforeach; ?>
 					</tbody>
 				</table>
+
+				<!-- Modals for Presensi Bulanan -->
+				<?php
+				$unique_employee_ids = [];
+
+				foreach ($data['presensi'] as $p) {
+					$employee_id = $p->employee_id;
+					$employee_name = $p->employee_name;
+					if (!in_array($employee_id, $unique_employee_ids)) {
+						$unique_employee_ids[] = $employee_id;
+
+						$bulanan = $data['presensiBulanan'][$employee_id] ?? [];
+
+						echo '<div class="modal fade" id="modalPresensi_' . $employee_id . '" tabindex="-1" aria-labelledby="modalLabel_' . $employee_id . '" aria-hidden="true">';
+						echo '<div class="modal-dialog modal-dialog-centered modal-lg">';
+						echo '<div class="modal-content">';
+						echo '<div class="modal-header">';
+						echo '<h5 class="modal-title" id="modalLabel_' . $employee_id . '">Rekap Bulanan ' . $employee_name . '</h5>';
+						echo '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>';
+						echo '</div>';
+						echo '<div class="modal-body">';
+						if ($bulanan):
+							?>
+							<table class="table table-sm table-striped">
+								<thead>
+									<tr>
+										<th>Tanggal</th>
+										<th>Clock In</th>
+										<th>Clock Out</th>
+										<th>Status In</th>
+										<th>Status Out</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php foreach ($bulanan as $b): ?>
+										<tr>
+											<td><?= date('d-m-Y', strtotime($b->created_at)) ?></td>
+											<td><?= $b->clock_in ?? '-' ?></td>
+											<td><?= $b->clock_out ?? '-' ?></td>
+											<td><?= $b->status_in ?? '-' ?></td>
+											<td><?= $b->status_out ?? '-' ?></td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+							<?php
+						else:
+							echo "<p>Tidak ada data presensi bulanan.</p>";
+						endif;
+						echo '</div>'; // modal-body
+						echo '<div class="modal-footer">';
+						echo '<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>';
+						echo '</div>';
+						echo '</div>';
+						echo '</div>';
+						echo '</div>';
+					}
+				}
+				?>
 			</div>
 		</div>
 	</div>

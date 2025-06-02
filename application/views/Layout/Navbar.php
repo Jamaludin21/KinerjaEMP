@@ -22,12 +22,13 @@
 						<small class="text-muted">
 							<?php
 							$roles = [
+								1 => "Lurah",
 								2 => "Kepala Sekretariat",
 								3 => "Kepala Kesejahteraan Sosial",
 								4 => "Kepala Pemerintahan dan Trantibum",
 								5 => "Kepala Pemberdayaan Masyarakat dan Pembangunan",
 							];
-							echo $roles[$this->session->userdata("role")] ?? "Lurah";
+							echo $roles[$this->session->userdata("role")] ?? "Pegawai";
 							?>
 						</small>
 					</a>

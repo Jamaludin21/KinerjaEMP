@@ -9,16 +9,33 @@ class User_model extends CI_Model
 		$this->load->database();
 	}
 
-	// Fetch all users
-	public function get_all_users()
+	public function count_users()
 	{
-		$this->db->select('id, role, username, email, created_at');
-		$this->db->from('users');
-		$this->db->order_by('role', 'ASC'); // Order by role first (ascending)
-		$this->db->order_by('created_at', 'DESC'); // Order by latest users
+		return $this->db->count_all('users');
+	}
+
+	// Fetch all users
+	public function get_all_users($currentUserId, $currentRoleId)
+	{
+		if ($currentRoleId == 1) {
+			// Lurah can see all users
+			$this->db->select('id, role, username, email, created_at');
+			$this->db->from('users');
+			$this->db->order_by('role', 'ASC');
+			$this->db->order_by('created_at', 'DESC');
+			$this->db->where('role != 6');
+		} elseif (in_array($currentRoleId, [2, 3, 4, 5])) {
+			// Kepala Seksi/Divisi: show themselves + their employees
+			$this->db->select('u.id, u.role, u.username, u.email, u.created_at');
+			$this->db->from('users u');
+			$this->db->join('employees e', 'u.id = e.user_id', 'left');
+			$this->db->where("(u.id = $currentUserId OR e.supervisor_id = $currentUserId)");
+		}
+
 		$query = $this->db->get();
 		return $query->result_array();
 	}
+
 
 	public function get_role()
 	{
@@ -32,5 +49,10 @@ class User_model extends CI_Model
 	public function insert_user($data)
 	{
 		return $this->db->insert('users', $data);
+	}
+
+	public function update_user($data)
+	{
+		return $this->db->update('users', $data);
 	}
 }

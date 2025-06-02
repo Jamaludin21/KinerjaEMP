@@ -15,13 +15,22 @@
 					<?php
 					$menu_items = [
 						['url' => '', 'icon' => 'bx-home-circle', 'title' => 'Dashboard'],
-						['url' => 'users', 'icon' => 'bx-user', 'title' => 'Data Pengguna'],
-						['url' => 'rekap', 'icon' => 'bx-archive-in', 'title' => 'Rekap Absensi'],
-						['url' => 'penilaian', 'icon' => 'bx-label', 'title' => 'Penilaian Kerja'],
-						['url' => 'pencapaian', 'icon' => 'bx-pie-chart-alt-2', 'title' => 'Pencapaian Kerja'],
+						['url' => 'users', 'icon' => 'bx-user', 'title' => 'Manajemen Pegawai', 'status' => 'limited'],
+						['url' => 'rekap', 'icon' => 'bx-archive-in', 'title' => 'Absensi'],
+						['url' => 'laporan', 'icon' => 'bx-book', 'title' => 'Laporan'],
+						['url' => 'penilaian', 'icon' => 'bx-label', 'title' => 'Pencatatan Kinerja'],
 					];
 
 					foreach ($menu_items as $item): ?>
+						<?php
+						// Check if menu has 'limited' status and user role is NOT in roleLabels
+						$is_limited = isset($item['status']) && $item['status'] === 'limited';
+						$employee_role = $session['role'] == 6;
+
+						if ($is_limited && $employee_role) {
+							continue; // Skip rendering this menu item
+						}
+						?>
 						<li class="menu-item <?= ($this->uri->uri_string() === $item['url']) ? 'active' : '' ?>">
 							<a href="<?= base_url($item['url']) ?>" class="menu-link">
 								<i class="menu-icon tf-icons bx <?= $item['icon'] ?>"></i>
