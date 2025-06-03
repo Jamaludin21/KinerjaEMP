@@ -141,7 +141,6 @@ class main extends CI_Controller
 			$employeeId = $employee->id;
 			$userId = $currentUserId;
 			$presensiList = $this->Presensi_model->get_presensi_by_employee($employeeId, $bulan, $tahun);
-			$presensiBulanan = $this->Presensi_model->getPresensiBulanan($userId, $bulan, $tahun);
 			$user = $this->db->get_where('users', ['id' => $userId])->row();
 		} elseif (in_array($currentUserRole, [2, 3, 4, 5])) {
 			// Head of Division

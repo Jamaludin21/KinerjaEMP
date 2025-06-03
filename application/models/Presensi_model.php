@@ -26,10 +26,15 @@ class Presensi_model extends CI_Model
 
 	public function get_presensi_by_employee($employeeId, $bulan, $tahun)
 	{
+		$this->db->select('p.*, u.username as employee_name, u.email as employee_email, u.id as user_id');
+		$this->db->from('presensi p');
+		$this->db->join('employees e', 'p.employee_id = e.id');
+		$this->db->join('users u', 'e.user_id = u.id');
 		$this->db->where('employee_id', $employeeId);
-		$this->db->where('MONTH(created_at)', $bulan);
-		$this->db->where('YEAR(created_at)', $tahun);
-		return $this->db->get('presensi')->result();
+		$this->db->where('MONTH(p.created_at)', $bulan);
+		$this->db->where('YEAR(p.created_at)', $tahun);
+		$this->db->order_by('p.created_at');
+		return $this->db->get()->result();
 	}
 
 	public function get_presensi_by_supervisor($supervisorUserId, $date)
@@ -40,7 +45,6 @@ class Presensi_model extends CI_Model
 		$this->db->join('users u', 'e.user_id = u.id');
 		$this->db->where("e.supervisor_id", $supervisorUserId);
 		$this->db->where('DATE(p.created_at)', $date);
-
 		return $this->db->get()->result();
 	}
 
@@ -52,6 +56,7 @@ class Presensi_model extends CI_Model
 		$this->db->join('employees e', 'p.employee_id = e.id');
 		$this->db->join('users u', 'e.user_id = u.id');
 		$this->db->where('DATE(p.created_at)', $date);
+		$this->db->group_by('p.employee_id');
 		return $this->db->get()->result();
 	}
 
@@ -60,6 +65,7 @@ class Presensi_model extends CI_Model
 		$this->db->where('employee_id', $userId);
 		$this->db->where('MONTH(created_at)', $bulan);
 		$this->db->where('YEAR(created_at)', $tahun);
+		$this->db->order_by('created_at');
 		return $this->db->get('presensi')->result();
 	}
 
