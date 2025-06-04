@@ -6,8 +6,11 @@ class action extends CI_Controller
 	public function __construct()
 	{
 		parent::__construct();
+
 		$this->load->library(['form_validation', 'session']);
 		$this->load->model('User_model');
+		$this->load->model('Presensi_model');
+		$this->sessionUserId = $this->session->userdata('user_id');
 	}
 
 	public function save_user()
@@ -107,6 +110,46 @@ class action extends CI_Controller
 		}
 
 		echo json_encode($response);
+	}
+
+
+	public function clock_in()
+	{
+		$employee_id = $this->input->post('employee_id');
+		$clock_in_date = $this->input->post('clock_in_date_hidden');
+		$currentUserId = $this->sessionUserId;
+
+		if (!$clock_in_date || !$employee_id) {
+			$this->session->set_flashdata('error', 'Data clock-in tidak lengkap.');
+			return redirect('rekap');
+		}
+
+		// Prevent duplicate clock in for the same day
+		$existing = $this->Presensi_model->getByDateAndEmployee($employee_id, $clock_in_date);
+		if ($existing) {
+			$this->session->set_flashdata('error', 'Anda sudah melakukan Clock In hari ini.');
+			return redirect('rekap');
+		}
+
+		$this->Presensi_model->clock_in($currentUserId);
+		$this->session->set_flashdata('success', 'Clock In berhasil.');
+		return redirect('rekap');
+	}
+
+
+	public function clock_out()
+	{
+		$presensi_id = $this->input->post('presensi_id');
+
+		$presensi = $this->Presensi_model->getById($presensi_id);
+		if (!$presensi || $presensi->clock_out) {
+			$this->session->set_flashdata('error', 'Clock Out tidak valid.');
+			return redirect('presensi');
+		}
+
+		$this->Presensi_model->clock_out($presensi_id);
+		$this->session->set_flashdata('success', 'Clock Out berhasil.');
+		return redirect('rekap');
 	}
 
 

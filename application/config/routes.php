@@ -59,7 +59,8 @@ $route['users'] = 'main/users';
 $route['rekap'] = 'main/recap';
 $route['penilaian'] = 'main/evaluated';
 $route['pencapaian'] = 'main/achievement';
-
+$route['clockIn'] = 'action/clock_in';
+$route['clockOut'] = 'action/clock_out';
 $route['postLogin'] = "auth/postLogin";
 $route['logout'] = 'auth/logout';
 

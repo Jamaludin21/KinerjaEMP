@@ -14,8 +14,18 @@
 						Absen Kehadiran
 					</button>
 				<?php endif; ?>
-			</div>
 
+			</div>
+			<?php if ($this->session->flashdata('success')): ?>
+				<div class="alert alert-success mx-3" role="alert">
+					<?= $this->session->flashdata('success') ?>
+				</div>
+			<?php endif; ?>
+			<?php if ($this->session->flashdata('error')): ?>
+				<div class="alert alert-danger mx-3" role="alert">
+					<?= $this->session->flashdata('error') ?>
+				</div>
+			<?php endif; ?>
 			<div class="table-responsive text-nowrap">
 				<table class="table table-bordered">
 					<thead>
@@ -50,9 +60,10 @@
 									<td class="<?= !$p->clock_out ? "text-center" : "" ?>">
 										<?php if (!$p->clock_out): ?>
 											<!-- Clock Out Form Inline -->
-											<form action="<?= base_url('presensi/clock_out') ?>" method="POST"
-												style="display:inline;">
+											<form action="<?= base_url('clockOut') ?>" method="POST" style="display:inline;">
 												<input type="hidden" name="presensi_id" value="<?= $p->id ?>">
+												<input type="hidden" name="clock_out_location"
+													id="clock_out_location_<?= $p->id ?>">
 												<button type="submit" class="btn btn-sm btn-warning">Clock Out</button>
 											</form>
 										<?php else: ?>
@@ -152,8 +163,8 @@
 					<!-- Modal Clock In -->
 					<div class="modal fade" id="clockInModal" tabindex="-1" aria-labelledby="clockInModalLabel"
 						aria-hidden="true">
-						<div class="modal-dialog">
-							<form action="<?= base_url('presensi/clock_in') ?>" method="POST">
+						<div class="modal-dialog modal-dialog-centered">
+							<form action="<?= base_url('clockIn') ?>" method="POST">
 								<div class="modal-content">
 									<div class="modal-header">
 										<h5 class="modal-title">Absen Clock In</h5>
@@ -162,17 +173,22 @@
 									</div>
 									<div class="modal-body">
 										<div class="mb-3">
-											<label for="tanggal" class="form-label">Tanggal</label>
-											<input type="date" class="form-control" name="tanggal" required
-												value="<?= date('Y-m-d') ?>">
+											<label for="clock_in_date" class="form-label">Tanggal</label>
+											<input type="date" class="form-control" id="clock_in_date"
+												value="<?= $data['tanggal'] ?>" disabled>
+											<input type="hidden" name="clock_in_date_hidden" id="clock_in_date_hidden"
+												value="<?= $data['tanggal'] ?>">
 										</div>
 										<div class="mb-3">
 											<label for="clock_in" class="form-label">Jam Clock In</label>
-											<input type="time" class="form-control" name="clock_in" required>
+											<input type="time" class="form-control" name="clock_in_time" id="clock_in_time"
+												disabled>
+											<input type="hidden" name="clock_in_time_hidden" id="clock_in_time_hidden">
 										</div>
 										<!-- Hidden employee id from session -->
-										<input type="hidden" name="employee_id"
-											value="<?= $this->session->userdata('user_id') ?>">
+										<input type="hidden" name="employee_id" id="employee_id"
+											value="<?= $data['employee_id'] ?>">
+										<input type="hidden" name="clock_in_location" id="clock_in_location">
 									</div>
 									<div class="modal-footer">
 										<button type="submit" class="btn btn-primary">Submit Clock In</button>
@@ -190,3 +206,58 @@
 	</div>
 </div>
 <!-- / Content -->
+
+<script>
+	document.addEventListener('DOMContentLoaded', function () {
+
+		// Clock In Modal Handling
+		const clockInModal = document.getElementById('clockInModal');
+		if (clockInModal) {
+			clockInModal.addEventListener('show.bs.modal', function () {
+				const now = new Date();
+
+				const dateStr = now.toISOString().split('T')[0];
+				const timeStr = now.toTimeString().split(' ')[0].slice(0, 5); // HH:MM
+
+				// Set disabled fields
+				document.getElementById('clock_in_date').value = dateStr;
+				document.getElementById('clock_in_time').value = timeStr;
+
+				// Set hidden fields for form submission
+				document.getElementById('clock_in_date_hidden').value = dateStr;
+				document.getElementById('clock_in_time_hidden').value = timeStr;
+
+
+				// Geolocation
+				const locationInput = document.getElementById('clock_in_location');
+				if (navigator.geolocation) {
+					navigator.geolocation.getCurrentPosition(
+						pos => {
+							locationInput.value = `${pos.coords.latitude},${pos.coords.longitude}`;
+						},
+						err => {
+							console.warn('Geolocation error:', err.message);
+							locationInput.value = 'Unknown';
+						}
+					);
+				} else {
+					locationInput.value = 'Not supported';
+				}
+			});
+		}
+
+		// Clock Out Button Form Handling
+		document.querySelectorAll("form[action*='clock_out']").forEach(form => {
+			const hiddenField = form.querySelector("input[name='clock_out_location']");
+
+			if (navigator.geolocation && hiddenField) {
+				navigator.geolocation.getCurrentPosition(position => {
+					hiddenField.value = `${position.coords.latitude},${position.coords.longitude}`;
+				}, err => {
+					console.warn("Geolocation error:", err.message);
+					hiddenField.value = "Unknown";
+				});
+			}
+		});
+	});
+</script>

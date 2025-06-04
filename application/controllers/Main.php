@@ -115,7 +115,7 @@ class main extends CI_Controller
 	}
 
 	// Recap Page
-	public function recap($employeeId = null)
+	public function recap()
 	{
 		$this->require_login();
 

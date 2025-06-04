@@ -23,6 +23,20 @@ class Presensi_model extends CI_Model
 		return $this->db->count_all('presensi'); // or your attendance table name
 	}
 
+	public function getByDateAndEmployee($employee_id, $tanggal)
+	{
+		return $this->db->where('employee_id', $employee_id)
+			->where('DATE(created_at)', $tanggal)
+			->get('presensi')
+			->row();
+	}
+
+	public function getById($id)
+	{
+		return $this->db->where('id', $id)->get('presensi')->row();
+	}
+
+
 
 	public function get_presensi_by_employee($employeeId, $bulan, $tahun)
 	{
@@ -68,5 +82,68 @@ class Presensi_model extends CI_Model
 		$this->db->order_by('created_at');
 		return $this->db->get('presensi')->result();
 	}
+
+	public function has_clocked_in_today($employeeId)
+	{
+		$this->db->where('employee_id', $employeeId);
+		$this->db->where('DATE(created_at)', date('Y-m-d'));
+		return $this->db->get('presensi')->row();
+	}
+
+	public function clock_in($userId)
+	{
+		$employee = $this->db->get_where('employees', ['user_id' => $userId])->row();
+		if (!$employee)
+			return false;
+
+		$now = date('Y-m-d H:i:s');
+		$time = date('H:i:s');
+
+		$status_in = ($time <= '08:00:00') ? 'ontime' : 'late';
+
+		$data = [
+			'employee_id' => $employee->id,
+			'clock_in' => $now,
+			'status_in' => $status_in,
+			'latitude_in' => $this->input->post('latitude'),
+			'longitude_in' => $this->input->post('longitude'),
+			'created_at' => $now
+		];
+
+		$this->db->insert('presensi', $data);
+		return $this->db->insert_id();
+	}
+
+	public function clock_out($userId)
+	{
+		$employee = $this->db->get_where('employees', ['user_id' => $userId])->row();
+		if (!$employee)
+			return false;
+
+		$now = date('Y-m-d H:i:s');
+		$time = date('H:i:s');
+
+		$status_out = ($time < '17:00:00') ? 'early' : 'ontime';
+
+		$this->db->where('employee_id', $employee->id);
+		$this->db->where('DATE(created_at)', date('Y-m-d'));
+		$this->db->order_by('id', 'DESC');
+		$this->db->limit(1);
+
+		$lastPresensi = $this->db->get('presensi')->row();
+
+		if ($lastPresensi && $lastPresensi->clock_out === null) {
+			$this->db->where('id', $lastPresensi->id);
+			return $this->db->update('presensi', [
+				'clock_out' => $now,
+				'status_out' => $status_out,
+				'latitude_out' => $this->input->post('latitude'),
+				'longitude_out' => $this->input->post('longitude')
+			]);
+		}
+
+		return false;
+	}
+
 
 }
