@@ -25,6 +25,7 @@ class main extends CI_Controller
 	private function render($view, $data = [], $is_login = false)
 	{
 		$data['session'] = $this->session->userdata();
+		$data['is_login'] = $is_login; // Pass this flag to views
 		$this->load->view('Layout/Header', $data);
 
 		if (!$is_login) {
@@ -143,11 +144,28 @@ class main extends CI_Controller
 			$presensiList = $this->Presensi_model->get_presensi_by_employee($employeeId, $bulan, $tahun);
 			$user = $this->db->get_where('users', ['id' => $userId])->row();
 		} elseif (in_array($currentUserRole, [2, 3, 4, 5])) {
-			// Head of Division
-			$presensiList = $this->Presensi_model->get_presensi_by_supervisor($currentUserId, $tanggal);
-			foreach ($presensiList as $p) {
-				$presensiBulanan[$p->employee_id] = $this->Presensi_model->getPresensiBulanan($p->employee_id, $bulan, $tahun);
+			// Head of Division']
+			$employee = $this->db->get_where('employees', ['user_id' => $currentUserId])->row();
+			if (!$employee) {
+				$this->session->set_flashdata('error', 'Data pegawai tidak ditemukan.');
+				redirect('');
 			}
+
+			$employeeId = $employee->id;
+			$employeeUserId = $employee->user_id;
+			$presensiList = $this->Presensi_model->get_presensi_by_employee($employeeId, $bulan, $tahun);
+			$staffList = $this->db->get_where('employees', ['supervisor_id' => $employeeUserId])->result();
+
+			$staffPresensi = [];
+			foreach ($staffList as $staff) {
+				$presensi = $this->Presensi_model->get_presensi_by_employee($staff->id, $bulan, $tahun);
+				if (!empty($presensi)) {
+					foreach ($presensi as $p) {
+						$staffPresensi[] = $p;
+					}
+				}
+			}
+
 			$user = $this->db->get_where('users', ['id' => $currentUserId])->row();
 		} elseif ($currentUserRole === 1) {
 			// Lurah / Admin
@@ -165,7 +183,8 @@ class main extends CI_Controller
 			'title' => 'Data Rekap',
 			'data' => [
 				'presensiBulanan' => $presensiBulanan,
-				'presensi' => $presensiList,
+				'presensi' => $presensiList ?? [],
+				'staffPresensi' => $staffPresensi ?? [],
 				'user' => $user,
 				'employee_id' => $employeeId ?? null,
 				'user_id' => $userId ?? null,

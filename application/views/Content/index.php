@@ -1,12 +1,13 @@
 <!-- Content wrapper -->
 <div class="content-wrapper">
-	<?php if ($this->session->flashdata('error')): ?>
-		<div class="alert alert-danger" role="alert">
-			<?= $this->session->flashdata('error') ?>
-		</div>
-	<?php endif; ?>
+
 	<!-- Content -->
 	<div class="container-xxl flex-grow-1 container-p-y">
+		<?php if ($this->session->flashdata('error')): ?>
+			<div class="alert alert-danger" role="alert">
+				<?= $this->session->flashdata('error') ?>
+			</div>
+		<?php endif; ?>
 		<div class="row">
 			<div class="col-lg-3 col-md-12 col-6 mb-4">
 				<div class="card">

@@ -117,9 +117,11 @@ class action extends CI_Controller
 	{
 		$employee_id = $this->input->post('employee_id');
 		$clock_in_date = $this->input->post('clock_in_date_hidden');
+		$clock_in_location_latitude = $this->input->post('clock_in_location_latitude');
+		$clock_in_location_longitude = $this->input->post('clock_in_location_longitude');
 		$currentUserId = $this->sessionUserId;
 
-		if (!$clock_in_date || !$employee_id) {
+		if (!$clock_in_date || !$employee_id || !$clock_in_location_latitude || !$clock_in_location_longitude) {
 			$this->session->set_flashdata('error', 'Data clock-in tidak lengkap.');
 			return redirect('rekap');
 		}
@@ -127,11 +129,11 @@ class action extends CI_Controller
 		// Prevent duplicate clock in for the same day
 		$existing = $this->Presensi_model->getByDateAndEmployee($employee_id, $clock_in_date);
 		if ($existing) {
-			$this->session->set_flashdata('error', 'Anda sudah melakukan Clock In hari ini.');
+			$this->session->set_flashdata('error', 'Anda sudah melakukan Clock In hari ini!');
 			return redirect('rekap');
 		}
 
-		$this->Presensi_model->clock_in($currentUserId);
+		$this->Presensi_model->clock_in($currentUserId, $employee_id, $clock_in_location_latitude, $clock_in_location_longitude);
 		$this->session->set_flashdata('success', 'Clock In berhasil.');
 		return redirect('rekap');
 	}
@@ -140,14 +142,25 @@ class action extends CI_Controller
 	public function clock_out()
 	{
 		$presensi_id = $this->input->post('presensi_id');
+		$employee_id = $this->input->post('employee_id');
+		$clock_out_location_latitude = $this->input->post('clock_out_location_latitude');
+		$clock_out_location_longitude = $this->input->post('clock_out_location_longitude');
+		$currentUserId = $this->sessionUserId;
+
+		var_dump($presensi_id, $employee_id, $clock_out_location_latitude, $clock_out_location_longitude);
+
+		if (!$employee_id || !$presensi_id || !$clock_out_location_latitude || !$clock_out_location_longitude) {
+			$this->session->set_flashdata('error', 'Data clock-out tidak lengkap.');
+			return redirect('rekap');
+		}
 
 		$presensi = $this->Presensi_model->getById($presensi_id);
 		if (!$presensi || $presensi->clock_out) {
 			$this->session->set_flashdata('error', 'Clock Out tidak valid.');
-			return redirect('presensi');
+			return redirect('rekap');
 		}
 
-		$this->Presensi_model->clock_out($presensi_id);
+		$this->Presensi_model->clock_out($currentUserId, $employee_id, $presensi_id, $clock_out_location_latitude, $clock_out_location_longitude);
 		$this->session->set_flashdata('success', 'Clock Out berhasil.');
 		return redirect('rekap');
 	}

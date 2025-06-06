@@ -1,5 +1,6 @@
 <?php
 
+date_default_timezone_set('Asia/Jakarta');
 class Presensi_model extends CI_Model
 {
 	protected $table = 'presensi';
@@ -51,17 +52,6 @@ class Presensi_model extends CI_Model
 		return $this->db->get()->result();
 	}
 
-	public function get_presensi_by_supervisor($supervisorUserId, $date)
-	{
-		$this->db->select('p.*, u.username as employee_name, u.email as employee_email, u.id as user_id');
-		$this->db->from('presensi p');
-		$this->db->join('employees e', 'p.employee_id = e.id');
-		$this->db->join('users u', 'e.user_id = u.id');
-		$this->db->where("e.supervisor_id", $supervisorUserId);
-		$this->db->where('DATE(p.created_at)', $date);
-		return $this->db->get()->result();
-	}
-
 
 	public function get_presensi_all_today($date)
 	{
@@ -90,7 +80,7 @@ class Presensi_model extends CI_Model
 		return $this->db->get('presensi')->row();
 	}
 
-	public function clock_in($userId)
+	public function clock_in($userId, $employee_id, $clock_in_location_latitude, $clock_in_location_longitude)
 	{
 		$employee = $this->db->get_where('employees', ['user_id' => $userId])->row();
 		if (!$employee)
@@ -102,11 +92,11 @@ class Presensi_model extends CI_Model
 		$status_in = ($time <= '08:00:00') ? 'ontime' : 'late';
 
 		$data = [
-			'employee_id' => $employee->id,
+			'employee_id' => $employee_id,
 			'clock_in' => $now,
 			'status_in' => $status_in,
-			'latitude_in' => $this->input->post('latitude'),
-			'longitude_in' => $this->input->post('longitude'),
+			'latitude_in' => $clock_in_location_latitude,
+			'longitude_in' => $clock_in_location_longitude,
 			'created_at' => $now
 		];
 
@@ -114,7 +104,7 @@ class Presensi_model extends CI_Model
 		return $this->db->insert_id();
 	}
 
-	public function clock_out($userId)
+	public function clock_out($userId, $employee_id, $presensi_id, $clock_out_location_latitude, $clock_out_location_longitude)
 	{
 		$employee = $this->db->get_where('employees', ['user_id' => $userId])->row();
 		if (!$employee)
@@ -125,11 +115,9 @@ class Presensi_model extends CI_Model
 
 		$status_out = ($time < '17:00:00') ? 'early' : 'ontime';
 
-		$this->db->where('employee_id', $employee->id);
+		$this->db->where('employee_id', $employee_id);
+		$this->db->where('id', $presensi_id);
 		$this->db->where('DATE(created_at)', date('Y-m-d'));
-		$this->db->order_by('id', 'DESC');
-		$this->db->limit(1);
-
 		$lastPresensi = $this->db->get('presensi')->row();
 
 		if ($lastPresensi && $lastPresensi->clock_out === null) {
@@ -137,8 +125,8 @@ class Presensi_model extends CI_Model
 			return $this->db->update('presensi', [
 				'clock_out' => $now,
 				'status_out' => $status_out,
-				'latitude_out' => $this->input->post('latitude'),
-				'longitude_out' => $this->input->post('longitude')
+				'latitude_out' => $clock_out_location_latitude,
+				'longitude_out' => $clock_out_location_longitude
 			]);
 		}
 
