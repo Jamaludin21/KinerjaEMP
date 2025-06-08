@@ -9,6 +9,7 @@ class main extends CI_Controller
 		$this->load->library(['form_validation', 'session', 'pagination']);
 		$this->load->model('User_model');
 		$this->load->model('Presensi_model');
+		$this->load->model('Report_model');
 		$this->sessionUserId = $this->session->userdata('user_id');
 		$this->sessionUserRole = $this->session->userdata('role');
 		$this->roleLabels = [
@@ -126,31 +127,27 @@ class main extends CI_Controller
 
 		$currentUserId = $this->sessionUserId;
 		$currentUserRole = (int) $this->sessionUserRole;
-
+		$staffPresensi = [];
+		$employeeId = null;
 		$presensiList = [];
 		$presensiBulanan = [];
-		$user = null;
+
+		$user = $this->db->get_where('users', ['id' => $currentUserId])->row();
+		$employee = $this->db->get_where('employees', ['user_id' => $currentUserId])->row();
+
+		if (in_array($currentUserRole, [2, 3, 4, 5, 6]) && !$employee) {
+			$this->session->set_flashdata('error', 'Data pegawai tidak ditemukan.');
+			redirect('');
+		}
 
 		if ($currentUserRole === 6) {
 			// Pegawai
-			$employee = $this->db->get_where('employees', ['user_id' => $currentUserId])->row();
-			if (!$employee) {
-				$this->session->set_flashdata('error', 'Data pegawai tidak ditemukan.');
-				redirect('');
-			}
-
 			$employeeId = $employee->id;
 			$userId = $currentUserId;
 			$presensiList = $this->Presensi_model->get_presensi_by_employee($employeeId, $bulan, $tahun);
 			$user = $this->db->get_where('users', ['id' => $userId])->row();
-		} elseif (in_array($currentUserRole, [2, 3, 4, 5])) {
-			// Head of Division']
-			$employee = $this->db->get_where('employees', ['user_id' => $currentUserId])->row();
-			if (!$employee) {
-				$this->session->set_flashdata('error', 'Data pegawai tidak ditemukan.');
-				redirect('');
-			}
-
+		} else if (in_array($currentUserRole, [2, 3, 4, 5])) {
+			// Head of Division
 			$employeeId = $employee->id;
 			$employeeUserId = $employee->user_id;
 			$presensiList = $this->Presensi_model->get_presensi_by_employee($employeeId, $bulan, $tahun);
@@ -166,14 +163,30 @@ class main extends CI_Controller
 				}
 			}
 
-			$user = $this->db->get_where('users', ['id' => $currentUserId])->row();
-		} elseif ($currentUserRole === 1) {
+
+		} else if ($currentUserRole === 1) {
 			// Lurah / Admin
-			$presensiList = $this->Presensi_model->get_presensi_all_today($tanggal);
+			$presensiList = $this->Presensi_model->get_presensi_all_today();
 			foreach ($presensiList as $p) {
+				// Fetch user's role from users table if role not part of presensi object
+				if (!isset($p->role)) {
+					$emp = $this->db->get_where('employees', ['id' => $p->employee_id])->row();
+					if ($emp) {
+						$userRole = $this->db->get_where('users', ['id' => $emp->user_id])->row()->role ?? null;
+						$roleLabelInfo = $this->roleLabels[$userRole] ?? ['label' => 'Unknown', 'color' => 'secondary'];
+					} else {
+						$roleLabelInfo = ['label' => 'Unknown', 'color' => 'secondary'];
+					}
+				} else {
+					$roleLabelInfo = $this->roleLabels[$p->role] ?? ['label' => 'Unknown', 'color' => 'secondary'];
+				}
+
+				// Attach roleLabel info to presensi object
+				$p->roleLabel = (object) $roleLabelInfo;
+
+				// Also get monthly summary for employee
 				$presensiBulanan[$p->employee_id] = $this->Presensi_model->getPresensiBulanan($p->employee_id, $bulan, $tahun);
 			}
-			$user = $this->db->get_where('users', ['id' => $currentUserId])->row();
 		} else {
 			$this->session->set_flashdata('error', 'Akses tidak diizinkan.');
 			redirect('');
@@ -199,12 +212,38 @@ class main extends CI_Controller
 
 
 
-	// Evaluated Page
-	public function evaluated()
+	// report Page
+	public function report()
 	{
 		$this->require_login();
-		$this->render('Content/evaluated', ['title' => 'Data Penilaian']);
+		$currentUserId = $this->sessionUserId;
+		$currentUserRole = (int) $this->sessionUserRole;
+		$employee = $this->User_model->getEmployeeByUserId($currentUserId);
+
+		if ($currentUserRole == 1) {
+			$submittedReports = $this->Report_model->getSubmittedReports();
+			$archivedReports = $this->Report_model->getArchivedReports();
+		} elseif (in_array($currentUserRole, [2, 3, 4, 5])) {
+			$submittedReports = $this->Report_model->getReportsBySupervisor($employee->id);
+			$archivedReports = $this->Report_model->getArchivedReports();
+		} elseif ($currentUserRole == 6) {
+			$submittedReports = $this->Report_model->getReportsByStaff($employee->id);
+			$archivedReports = $this->Report_model->getArchivedReports();
+		} else {
+			$this->session->set_flashdata('error', 'Tidak ada izin untuk akses halaman ini!');
+			redirect('');
+		}
+
+		$data = [
+			'title' => 'Data Laporan',
+			'submittedReports' => $submittedReports,
+			'archivedReports' => $archivedReports,
+			'role' => $currentUserRole,
+		];
+
+		$this->render('Content/report', $data);
 	}
+
 
 	// Achievement Page
 	public function achievement()

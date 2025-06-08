@@ -18,7 +18,7 @@
 						['url' => 'users', 'icon' => 'bx-user', 'title' => 'Manajemen Pegawai', 'status' => 'limited'],
 						['url' => 'rekap', 'icon' => 'bx-archive-in', 'title' => 'Absensi'],
 						['url' => 'laporan', 'icon' => 'bx-book', 'title' => 'Laporan'],
-						['url' => 'penilaian', 'icon' => 'bx-label', 'title' => 'Pencatatan Kinerja'],
+						['url' => 'pencapaian', 'icon' => 'bx-label', 'title' => 'Pencatatan Kinerja'],
 					];
 
 					foreach ($menu_items as $item): ?>

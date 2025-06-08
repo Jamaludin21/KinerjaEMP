@@ -53,13 +53,12 @@ class Presensi_model extends CI_Model
 	}
 
 
-	public function get_presensi_all_today($date)
+	public function get_presensi_all_today()
 	{
 		$this->db->select('p.*, u.username as employee_name, u.email as employee_email');
 		$this->db->from('presensi p');
 		$this->db->join('employees e', 'p.employee_id = e.id');
 		$this->db->join('users u', 'e.user_id = u.id');
-		$this->db->where('DATE(p.created_at)', $date);
 		$this->db->group_by('p.employee_id');
 		return $this->db->get()->result();
 	}

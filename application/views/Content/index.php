@@ -28,8 +28,8 @@
 			<div class="col-lg-3 col-md-12 col-6 mb-4">
 				<div class="card">
 					<div class="card-body">
-						<span class="fw-semibold d-block mb-1">Data Penilaian</span>
-						<h3 class="card-title mb-2">$12,628</h3>
+						<span class="fw-semibold d-block mb-1">Data Laporan</span>
+						<h3 class="card-title mb-2">1</h3>
 					</div>
 				</div>
 			</div>
@@ -37,7 +37,7 @@
 				<div class="card">
 					<div class="card-body">
 						<span class="fw-semibold d-block mb-1">Data Pencapaian</span>
-						<h3 class="card-title mb-2">$12,628</h3>
+						<h3 class="card-title mb-2">2</h3>
 					</div>
 				</div>
 			</div>

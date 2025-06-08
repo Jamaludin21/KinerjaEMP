@@ -4,17 +4,13 @@
 	<div class="container-xxl container-p-y d-grid gap-5">
 		<div class="card">
 			<div class="card-header d-flex justify-content-between align-items-center">
-				<span>
-					<h4>Rekap Presensi</h4>
-					<p>Tanggal-Bulan-Tahun : <?= $data['tanggal'] ?></p>
-				</span>
+				<h4 class="mb-0">Rekap Presensi (<?= $data['tanggal'] ?>)</h4>
 				<?php if ((int) $this->session->userdata('role') !== 1): ?>
 					<button type="button" class="btn btn-sm btn-primary" data-bs-toggle="modal"
 						data-bs-target="#clockInModal">
 						Absen Kehadiran
 					</button>
 				<?php endif; ?>
-
 			</div>
 			<?php if ($this->session->flashdata('success')): ?>
 				<div class="alert alert-success mx-3" role="alert">
@@ -33,6 +29,7 @@
 							<?php if ((int) $this->session->userdata('role') == 1): ?>
 								<th>Nama</th>
 								<th>Email</th>
+								<th class="text-center">Role</th>
 							<?php endif; ?>
 							<?php if ((int) $this->session->userdata('role') !== 1): ?>
 								<th>Tanggal</th>
@@ -63,6 +60,11 @@
 										<tr>
 											<td><?= $p->employee_name ?? '-' ?></td>
 											<td><?= $p->employee_email ?? '-' ?></td>
+											<td class="text-center">
+												<span class="badge bg-label-<?= htmlspecialchars($p->roleLabel->color) ?>">
+													<?= htmlspecialchars($p->roleLabel->label) ?>
+												</span>
+											</td>
 											<td class="text-center">
 												<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
 													data-bs-target="#modalPresensi_<?= $employee_id ?>"
@@ -138,10 +140,8 @@
 		<div class="card">
 			<!-- Tambahan untuk Role 2-5: Tampilkan Presensi Staff -->
 			<?php if (in_array((int) $this->session->userdata('role'), [2, 3, 4, 5])): ?>
-
 				<div class="card-header">
-					<h4>Presensi Staff Anda</h4>
-					<p>Tanggal-Bulan-Tahun : <?= $data['tanggal'] ?></p>
+					<h4 class="mb-0">Presensi Staff Anda (<?= $data['tanggal'] ?>)</h4>
 				</div>
 				<div class="table-responsive text-nowrap">
 					<table class="table table-bordered">

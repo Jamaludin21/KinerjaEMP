@@ -222,6 +222,40 @@
 		<?php endforeach; ?>
 	<?php endif; ?>
 
+	<?php if ($role >= 2 && $role <= 5): ?>
+		<!-- Modal for evaluation -->
+		<div class="modal fade" id="evaluateModal_<?= $report->id ?>" tabindex="-1">
+			<div class="modal-dialog">
+				<form action="<?= base_url('report/evaluate/' . $report->id) ?>" method="post">
+					<div class="modal-content">
+						<div class="modal-header">
+							<h5 class="modal-title">Evaluasi Laporan</h5>
+							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+						</div>
+						<div class="modal-body">
+							<div class="mb-3">
+								<label>Status</label>
+								<select name="status" class="form-control" id="status_<?= $report->id ?>"
+									onchange="toggleDescription(<?= $report->id ?>)">
+									<option value="Approved">Disetujui</option>
+									<option value="Evaluated">Dievaluasi</option>
+								</select>
+							</div>
+							<div class="mb-3">
+								<label>Deskripsi Evaluasi</label>
+								<textarea name="description" class="form-control" id="desc_<?= $report->id ?>"
+									disabled></textarea>
+							</div>
+						</div>
+						<div class="modal-footer">
+							<button type="submit" class="btn btn-primary">Kirim</button>
+						</div>
+					</div>
+				</form>
+			</div>
+		</div>
+	<?php endif; ?>
+
 
 
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -400,6 +434,12 @@
 			});
 
 		});
+
+		function toggleDescription(id) {
+			const status = document.getElementById(`status_${id}`).value;
+			const desc = document.getElementById(`desc_${id}`);
+			desc.disabled = (status === 'Approved');
+		}
 	</script>
 
 <?php endif; ?>

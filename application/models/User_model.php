@@ -14,6 +14,11 @@ class User_model extends CI_Model
 		return $this->db->count_all('users');
 	}
 
+	public function getEmployeeByUserId($userId)
+	{
+		return $this->db->where('user_id', $userId)->get('employees')->row();
+	}
+
 	// Fetch all users
 	public function get_all_users($currentUserId, $currentRoleId)
 	{
