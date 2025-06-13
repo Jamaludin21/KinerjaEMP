@@ -218,25 +218,30 @@ class main extends CI_Controller
 		$this->require_login();
 		$currentUserId = $this->sessionUserId;
 		$currentUserRole = (int) $this->sessionUserRole;
+		$supervisedStaff = [];
 		$employee = $this->User_model->getEmployeeByUserId($currentUserId);
+
 
 		if ($currentUserRole == 1) {
 			$submittedReports = $this->Report_model->getSubmittedReports();
-			$archivedReports = $this->Report_model->getArchivedReports();
+			$archivedReports = $this->Report_model->getArchivedReports(null, null, $currentUserRole);
 		} elseif (in_array($currentUserRole, [2, 3, 4, 5])) {
-			$submittedReports = $this->Report_model->getReportsBySupervisor($employee->id);
-			$archivedReports = $this->Report_model->getArchivedReports();
+			$submittedReports = $this->Report_model->getReportsBySupervisor($currentUserId);
+			$archivedReports = $this->Report_model->getArchivedReports($currentUserId, null, $currentUserRole);
+			$supervisedStaff = $this->User_model->getStaffBySupervisor($currentUserId);
 		} elseif ($currentUserRole == 6) {
 			$submittedReports = $this->Report_model->getReportsByStaff($employee->id);
-			$archivedReports = $this->Report_model->getArchivedReports();
+			$archivedReports = $this->Report_model->getArchivedReports(null, $employee->id, $currentUserRole);
 		} else {
 			$this->session->set_flashdata('error', 'Tidak ada izin untuk akses halaman ini!');
 			redirect('');
 		}
 
+
 		$data = [
 			'title' => 'Data Laporan',
 			'submittedReports' => $submittedReports,
+			'supervisedStaff' => $supervisedStaff,
 			'archivedReports' => $archivedReports,
 			'role' => $currentUserRole,
 		];

@@ -10,7 +10,16 @@ class action extends CI_Controller
 		$this->load->library(['form_validation', 'session']);
 		$this->load->model('User_model');
 		$this->load->model('Presensi_model');
+		$this->load->model('Report_model');
 		$this->sessionUserId = $this->session->userdata('user_id');
+		$this->sessionUserRole = $this->session->userdata('role');
+	}
+
+	private function require_login()
+	{
+		if (!$this->session->userdata('user_id')) {
+			redirect('login');
+		}
 	}
 
 	public function save_user()
@@ -165,6 +174,118 @@ class action extends CI_Controller
 		return redirect('rekap');
 	}
 
+
+
+	public function assignTask()
+	{
+		$this->require_login();
+		$currentUserId = $this->sessionUserId;
+		$currentUserRole = (int) $this->sessionUserRole;
+
+		if (!in_array($currentUserRole, [2, 3, 4, 5])) {
+			$this->session->set_flashdata('error', 'Unauthorized');
+			redirect('laporan');
+		}
+
+		$employee_id = $this->input->post('employee_id');
+		$title = $this->input->post('title');
+		$description = $this->input->post('description');
+		$file = $_FILES['file'];
+
+		$filename = null;
+
+		if ($file['name']) {
+			$config['upload_path'] = './assets/uploads/tasks/';
+			$config['allowed_types'] = 'pdf|doc|docx|xls|xlsx|csv';
+			$config['file_name'] = time() . '_' . $file['name'];
+
+			$this->load->library('upload', $config);
+			if (!$this->upload->do_upload('file')) {
+				$this->session->set_flashdata('error', $this->upload->display_errors());
+				redirect('laporan');
+			} else {
+				$filename = $this->upload->data('file_name');
+			}
+		}
+
+		$this->Report_model->createTask([
+			'title' => $title,
+			'description' => $description,
+			'employee_id' => $employee_id,
+			'assigned_by' => $currentUserId,
+			'assigned_file' => $filename,
+			'status' => 'Submitted',
+		]);
+
+		$this->session->set_flashdata('success', 'Tugas berhasil di submit kepada Staff anda');
+		redirect('laporan');
+	}
+
+	public function upload()
+	{
+		$this->require_login();
+		$currentUserRole = (int) $this->sessionUserRole;
+
+		if ($currentUserRole != 6) {
+			$this->session->set_flashdata('error', 'Unauthorized');
+			redirect('laporan');
+		}
+
+		$report_id = $this->input->post('report_id');
+		$file = $_FILES['file'];
+
+		if (!$file['name']) {
+			$this->session->set_flashdata('error', 'File tidak boleh kosong.');
+			redirect('report');
+		}
+
+		var_dump($report_id, $file);
+
+		$config['upload_path'] = './assets/uploads/reports/';
+		$config['allowed_types'] = 'pdf|doc|docx|xls|xlsx|csv';
+		$config['file_name'] = time() . '_' . $file['name'];
+
+		$this->load->library('upload', $config);
+		if (!$this->upload->do_upload('file')) {
+			$this->session->set_flashdata('error', $this->upload->display_errors());
+			redirect('laporan');
+		}
+
+		$this->Report_model->submitReport($report_id, $this->upload->data('file_name'));
+
+		$this->session->set_flashdata('success', 'Tugas berhasil dikirim.');
+		redirect('laporan');
+	}
+
+	public function evaluate()
+	{
+		$this->require_login();
+		$currentUserRole = (int) $this->sessionUserRole;
+
+		if (!in_array($currentUserRole, [2, 3, 4, 5])) {
+			$this->session->set_flashdata('error', 'Unauthorized');
+			redirect('laporan');
+		}
+
+		$report_id = $this->input->post('report_id');
+		$status = $this->input->post('status');
+		$evaluation = $this->input->post('evaluation');
+
+		if (!in_array($status, ['Approved', 'Evaluated'])) {
+			$this->session->set_flashdata('error', 'Status tidak valid.');
+			redirect('laporan');
+		}
+
+		if ($status === 'Evaluated' && empty(trim($evaluation))) {
+			$this->session->set_flashdata('error', 'Catatan evaluasi wajib diisi jika status revisi.');
+			redirect('laporan');
+		}
+
+		$this->Report_model->evaluateReport($report_id, $status, $evaluation);
+
+		$this->session->set_flashdata('success', 'Laporan berhasil dievaluasi.');
+		redirect('laporan');
+	}
 
 
 }

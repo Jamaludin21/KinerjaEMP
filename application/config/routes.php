@@ -61,6 +61,9 @@ $route['laporan'] = 'main/report';
 $route['pencapaian'] = 'main/achievement';
 $route['clockIn'] = 'action/clock_in';
 $route['clockOut'] = 'action/clock_out';
+$route['assignTask'] = 'action/assignTask';
+$route['upload'] = 'action/upload';
+$route['evaluate'] = 'action/evaluate';
 $route['postLogin'] = "auth/postLogin";
 $route['logout'] = 'auth/logout';
 

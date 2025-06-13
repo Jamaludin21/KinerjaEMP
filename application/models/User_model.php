@@ -41,6 +41,15 @@ class User_model extends CI_Model
 		return $query->result_array();
 	}
 
+	public function getStaffBySupervisor($supervisor_id)
+	{
+		$this->db->select('e.id, u.username');
+		$this->db->from('employees e');
+		$this->db->join('users u', 'e.user_id = u.id');
+		$this->db->where('e.supervisor_id', $supervisor_id);
+		return $this->db->get()->result();
+	}
+
 
 	public function get_role()
 	{

@@ -17,7 +17,7 @@
 						['url' => '', 'icon' => 'bx-home-circle', 'title' => 'Dashboard'],
 						['url' => 'users', 'icon' => 'bx-user', 'title' => 'Manajemen Pegawai', 'status' => 'limited'],
 						['url' => 'rekap', 'icon' => 'bx-archive-in', 'title' => 'Absensi'],
-						['url' => 'laporan', 'icon' => 'bx-book', 'title' => 'Laporan'],
+						['url' => 'laporan', 'icon' => 'bx-book', 'title' => 'Laporan & Tugas'],
 						['url' => 'pencapaian', 'icon' => 'bx-label', 'title' => 'Pencatatan Kinerja'],
 					];
 

@@ -142,10 +142,10 @@
 						<input type="hidden" name="clock_in_location_latitude" id="clock_in_location_latitude">
 						<input type="hidden" name="clock_in_location_longitude" id="clock_in_location_longitude">
 					</div>
-					<div class="modal-footer">
+					<!-- <div class="modal-footer">
 						<button type="submit" class="btn btn-primary">Submit Clock In</button>
 						<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-					</div>
+					</div> -->
 				</form>
 			</div>
 		</div>
@@ -222,39 +222,105 @@
 		<?php endforeach; ?>
 	<?php endif; ?>
 
-	<?php if ($role >= 2 && $role <= 5): ?>
-		<!-- Modal for evaluation -->
-		<div class="modal fade" id="evaluateModal_<?= $report->id ?>" tabindex="-1">
-			<div class="modal-dialog">
-				<form action="<?= base_url('report/evaluate/' . $report->id) ?>" method="post">
-					<div class="modal-content">
-						<div class="modal-header">
-							<h5 class="modal-title">Evaluasi Laporan</h5>
-							<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+	<!-- Modal Beri Tugas -->
+	<div class="modal fade" id="assignTaskModal" tabindex="-1" aria-labelledby="assignTaskLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg ">
+			<form action="<?= base_url('assignTask') ?>" method="post" enctype="multipart/form-data">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="assignTaskLabel">Beri Tugas ke Staff</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="employee_id" class="form-label">Pilih Staff</label>
+							<select class="form-select" name="employee_id" required>
+								<option value="">-- Pilih Staff --</option>
+								<?php foreach ($supervisedStaff as $staff): ?>
+									<option value="<?= $staff->id ?>"><?= $staff->username ?></option>
+								<?php endforeach; ?>
+							</select>
 						</div>
-						<div class="modal-body">
-							<div class="mb-3">
-								<label>Status</label>
-								<select name="status" class="form-control" id="status_<?= $report->id ?>"
-									onchange="toggleDescription(<?= $report->id ?>)">
-									<option value="Approved">Disetujui</option>
-									<option value="Evaluated">Dievaluasi</option>
-								</select>
-							</div>
-							<div class="mb-3">
-								<label>Deskripsi Evaluasi</label>
-								<textarea name="description" class="form-control" id="desc_<?= $report->id ?>"
-									disabled></textarea>
-							</div>
+						<div class="mb-3">
+							<label for="title" class="form-label">Judul Laporan</label>
+							<input type="text" class="form-control" name="title" required>
 						</div>
-						<div class="modal-footer">
-							<button type="submit" class="btn btn-primary">Kirim</button>
+						<div class="mb-3">
+							<label for="description" class="form-label">Deskripsi</label>
+							<textarea class="form-control" name="description" rows="3"></textarea>
+						</div>
+						<div class="mb-3">
+							<label for="file" class="form-label">Upload File (PDF, Word, Excel, CSV)</label>
+							<input type="file" class="form-control" name="file">
 						</div>
 					</div>
-				</form>
-			</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-primary">Kirim Tugas</button>
+					</div>
+				</div>
+			</form>
 		</div>
-	<?php endif; ?>
+	</div>
+
+	<!-- Modal Evaluasi -->
+	<div class="modal fade" id="evaluateModal" tabindex="-1" aria-labelledby="evaluateModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<form action="<?= base_url('evaluate') ?>" method="post">
+				<input type="hidden" name="report_id" id="evaluate_report_id">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="evaluateModalLabel">Evaluasi Tugas</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="status" class="form-label">Status</label>
+							<select name="status" id="evaluation_status" class="form-select" required
+								onchange="toggleEvaluationNote(this.value)">
+								<option value="">-- Pilih Status --</option>
+								<option value="Approved">Disetujui</option>
+								<option value="Evaluated">Perlu Revisi</option>
+							</select>
+						</div>
+						<div class="mb-3">
+							<label for="evaluation" class="form-label">Catatan Evaluasi</label>
+							<textarea class="form-control" name="evaluation" id="evaluation_note" rows="4" disabled
+								placeholder="Isi catatan jika perlu revisi"></textarea>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-warning">Simpan Evaluasi</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+	<!-- Modal Upload Tugas -->
+	<div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<form action="<?= base_url('upload') ?>" method="post" enctype="multipart/form-data">
+				<input type="hidden" name="report_id" id="upload_report_id">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h5 class="modal-title" id="uploadModalLabel">Upload Tugas</h5>
+						<button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+					</div>
+					<div class="modal-body">
+						<div class="mb-3">
+							<label for="file" class="form-label">File Tugas (PDF, Word, Excel, CSV)</label>
+							<input type="file" class="form-control" name="file" required>
+						</div>
+					</div>
+					<div class="modal-footer">
+						<button type="submit" class="btn btn-success">Kirim</button>
+					</div>
+				</div>
+			</form>
+		</div>
+	</div>
+
+
 
 
 
@@ -439,6 +505,26 @@
 			const status = document.getElementById(`status_${id}`).value;
 			const desc = document.getElementById(`desc_${id}`);
 			desc.disabled = (status === 'Approved');
+		}
+
+		function setUploadId(id) {
+			document.getElementById('upload_report_id').value = id;
+		}
+
+		function setEvaluateId(id) {
+			document.getElementById('evaluate_report_id').value = id;
+		}
+
+		function toggleEvaluationNote(status) {
+			const textarea = document.getElementById('evaluation_note');
+			if (status === 'Evaluated') {
+				textarea.removeAttribute('disabled');
+				textarea.setAttribute('required', 'required');
+			} else {
+				textarea.setAttribute('disabled', 'disabled');
+				textarea.removeAttribute('required');
+				textarea.value = '';
+			}
 		}
 	</script>
 
