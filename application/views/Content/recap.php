@@ -139,7 +139,7 @@
 		</div>
 		<div class="card">
 			<!-- Tambahan untuk Role 2-5: Tampilkan Presensi Staff -->
-			<?php if (in_array((int) $this->session->userdata('role'), [2, 3, 4, 5])): ?>
+			<?php if (in_array((int) $this->session->userdata('role'), [2, 3, 4, 5]) && !empty($data['staffPresensi'])): ?>
 				<div class="card-header">
 					<h4 class="mb-0">Presensi Staff Anda (<?= $data['tanggal'] ?>)</h4>
 				</div>
@@ -148,44 +148,34 @@
 						<thead>
 							<tr>
 								<th>Nama</th>
-								<th>Tanggal</th>
-								<th>Clock In</th>
-								<th>Clock Out</th>
-								<th class="text-center">Status In</th>
-								<th class="text-center">Status Out</th>
+								<th>Email</th>
+								<th class="text-center">Role</th>
+								<th class="text-center">Aksi</th>
 							</tr>
 						</thead>
 						<tbody>
-							<?php if (!empty($data['staffPresensi'])): ?>
-								<?php foreach ($data['staffPresensi'] as $sp): ?>
-									<tr>
-										<td><?= $sp->employee_name ?? '-' ?></td>
-										<td><?= date('d-m-Y', strtotime($sp->created_at)) ?></td>
-										<td><?= $sp->clock_in ?? '-' ?></td>
-										<td><?= $sp->clock_out ?? '-' ?></td>
-										<td class="text-center">
-											<span
-												class="badge rounded-pill <?= $sp->status_in == "ontime" ? "bg-success" : "bg-danger" ?>">
-												<?= $sp->status_in ?? '-' ?>
-											</span>
-										</td>
-										<td class="text-center">
-											<span
-												class="badge rounded-pill <?= ($sp->status_out == "ontime") ? "bg-success" : (($sp->status_out == "early") ? "bg-warning" : "bg-info") ?>">
-												<?= $sp->status_out ?? 'Belum Clock Out' ?>
-											</span>
-										</td>
-									</tr>
-								<?php endforeach; ?>
-							<?php else: ?>
+							<?php
+							$shownStaffIds = [];
+							foreach ($data['staffPresensi'] as $sp):
+								if (in_array($sp->employee_id, $shownStaffIds)) continue;
+								$shownStaffIds[] = $sp->employee_id;
+							?>
 								<tr>
-									<td colspan="6">
-										<div class="alert alert-warning text-center" role="alert">
-											Belum ada data presensi staff di bawah Anda.
-										</div>
+									<td><?= $sp->employee_name ?? '-' ?></td>
+									<td><?= $sp->employee_email ?? '-' ?></td>
+									<td class="text-center">
+										<span class="badge bg-label-<?= htmlspecialchars($sp->roleLabel->color ?? 'secondary') ?>">
+											<?= htmlspecialchars($sp->roleLabel->label ?? '-') ?>
+										</span>
+									</td>
+									<td class="text-center">
+										<button type="button" class="btn btn-sm btn-info" data-bs-toggle="modal"
+											data-bs-target="#modalPresensi_<?= $sp->employee_id ?>" data-employee-id="<?= $sp->employee_id ?>">
+											Rekap Bulanan
+										</button>
 									</td>
 								</tr>
-							<?php endif; ?>
+							<?php endforeach; ?>
 						</tbody>
 					</table>
 				</div>

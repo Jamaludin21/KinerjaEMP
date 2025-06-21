@@ -287,5 +287,18 @@ class action extends CI_Controller
 		redirect('laporan');
 	}
 
+	public function save_achieve()
+	{
+		$role = (int) $this->session->userdata('role');
+		if (!in_array($role, [2, 3, 4, 5])) {
+			show_error('Tidak diizinkan menilai', 403);
+		}
 
+		$data = $this->input->post();
+		$data['created_by'] = $this->session->userdata('id');
+
+		$this->Achievement_model->upsert($data);
+		$this->session->set_flashdata('success', 'Penilaian berhasil disimpan.');
+		redirect('pencapaian');
+	}
 }

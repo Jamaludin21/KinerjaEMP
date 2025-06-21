@@ -10,6 +10,7 @@ class main extends CI_Controller
 		$this->load->model('User_model');
 		$this->load->model('Presensi_model');
 		$this->load->model('Report_model');
+		$this->load->model('Achievement_model');
 		$this->sessionUserId = $this->session->userdata('user_id');
 		$this->sessionUserRole = $this->session->userdata('role');
 		$this->roleLabels = [
@@ -142,7 +143,7 @@ class main extends CI_Controller
 
 		if ($currentUserRole === 6) {
 			// Pegawai
-			$employeeId = $employee->id;
+			$employeeId = $userId;
 			$userId = $currentUserId;
 			$presensiList = $this->Presensi_model->get_presensi_by_employee($employeeId, $bulan, $tahun);
 			$user = $this->db->get_where('users', ['id' => $userId])->row();
@@ -158,12 +159,16 @@ class main extends CI_Controller
 				$presensi = $this->Presensi_model->get_presensi_by_employee($staff->id, $bulan, $tahun);
 				if (!empty($presensi)) {
 					foreach ($presensi as $p) {
+						// Tambahkan role & email ke $p
+						$userStaff = $this->db->get_where('users', ['id' => $staff->user_id])->row();
+						$role = $userStaff->role ?? null;
+						$p->employee_email = $userStaff->email ?? '-';
+						$p->roleLabel = (object) ($this->roleLabels[$role] ?? ['label' => 'Unknown', 'color' => 'secondary']);
 						$staffPresensi[] = $p;
+						$presensiBulanan[$p->employee_id] = $this->Presensi_model->getPresensiBulanan($p->employee_id, $bulan, $tahun);
 					}
 				}
 			}
-
-
 		} else if ($currentUserRole === 1) {
 			// Lurah / Admin
 			$presensiList = $this->Presensi_model->get_presensi_all_today();
@@ -254,7 +259,68 @@ class main extends CI_Controller
 	public function achievement()
 	{
 		$this->require_login();
-		$this->render('Content/achievement', ['title' => 'Data Pencapaian']);
-	}
+		$role = (int) $this->session->userdata('role');
+		$userId = $this->session->userdata('user_id');
+		$employee = $this->db->get_where('employees', ['user_id' => $userId])->row();
+		$bulan = $this->input->get('bulan') ?? date('m');
+		$tahun = $this->input->get('tahun') ?? date('Y');
 
+		$achievementData = [];
+
+		if (in_array($role, [2, 3, 4, 5])) {
+			// Kepala departemen, menilai bawahannya
+			$staffList = $this->db->get_where('employees', ['supervisor_id' => $userId])->result();
+			foreach ($staffList as $staff) {
+				$user = $this->db->get_where('users', ['id' => $staff->user_id])->row();
+				$nilai = $this->Achievement_model->get_by_employee($staff->id, $bulan, $tahun);
+				$rekap = $this->Achievement_model->get_rekap_by_employee($staff->id);
+				$achievementData[] = [
+					'employee' => $staff,
+					'user' => $user,
+					'nilai' => $nilai,
+					'rekap' => $rekap
+				];
+			}
+		} elseif ($role === 6) {
+			// Staff hanya melihat dirinya
+			$user = $this->db->get_where('users', ['id' => $userId])->row();
+			$nilai = $this->Achievement_model->get_by_employee($employee->id, $bulan, $tahun);
+			$rekap = $this->Achievement_model->get_rekap_by_employee($employee->id);
+			$achievementData[] = [
+				'employee' => $employee,
+				'user' => $user,
+				'nilai' => $nilai,
+				'rekap' => $rekap
+			];
+		} elseif ($role === 1) {
+			// Admin melihat semua
+			$this->db->select('e.*, u.username');
+			$this->db->from('employees e');
+			$this->db->join('users u', 'e.user_id = u.id');
+			$staffList = $this->db->get()->result();
+
+			foreach ($staffList as $staff) {
+				$nilai = $this->Achievement_model->get_by_employee($staff->id, $bulan, $tahun);
+				$rekap = $this->Achievement_model->get_rekap_by_employee($staff->id);
+				$achievementData[] = [
+					'employee' => $staff,
+					'user' => (object)['username' => $staff->username],
+					'nilai' => $nilai,
+					'rekap' => $rekap
+				];
+			}
+		} else {
+			show_error('Akses tidak diizinkan', 403);
+		}
+
+		$data = [
+			'title' => 'Rekap Pencapaian Kinerja',
+			'bulan' => $bulan,
+			'tahun' => $tahun,
+			'data' => $achievementData,
+			'role' => $role
+		];
+
+		$this->render('Content/achievement', $data);
+	}
 }

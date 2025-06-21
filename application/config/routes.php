@@ -64,6 +64,7 @@ $route['clockOut'] = 'action/clock_out';
 $route['assignTask'] = 'action/assignTask';
 $route['upload'] = 'action/upload';
 $route['evaluate'] = 'action/evaluate';
+$route['achieve'] = 'action/save_achieve';
 $route['postLogin'] = "auth/postLogin";
 $route['logout'] = 'auth/logout';
 
